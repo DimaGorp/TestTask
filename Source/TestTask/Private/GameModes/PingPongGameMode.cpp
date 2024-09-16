@@ -6,16 +6,21 @@
 #include "Engine/TargetPoint.h"
 #include "Player/FieldPlayer.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
+#include "GameFramework/HUD.h"
 #include "Structs/S_PlayerData.h"
 
 APingPongGameMode::APingPongGameMode()
 {
+    // Set default pawn class using ConstructorHelpers
+    static ConstructorHelpers::FClassFinder<APawn> PawnClassFinder(TEXT("/Game/Blueprints/BP_FieldPlayer"));
+    DefaultPawnClass = PawnClassFinder.Class;
+
 }
 void APingPongGameMode::PostLogin(APlayerController * NewPlayer)
-
 {
     AFieldPlayerController * P_Controller = Cast<AFieldPlayerController>(NewPlayer);
-    P_Controller->MovementState(false);
+    //P_Controller->MovementState(false);
     int index  = Controllers.Add(P_Controller);
     SpawnPlayer(P_Controller,index);
 }
@@ -30,13 +35,13 @@ void APingPongGameMode::SpawnPlayer(AFieldPlayerController *Controller, int inde
 
     FActorSpawnParameters parametrs;
     parametrs.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-    AFieldPlayer * Pawn = GetWorld()->SpawnActor<AFieldPlayer>(AFieldPlayer::StaticClass(),PlayerStartTransform,parametrs);
+    AFieldPlayer * Pawn = GetWorld()->SpawnActor<AFieldPlayer>(DefaultPawnClass,PlayerStartTransform,parametrs);
     Controller->Possess(Pawn);
 }
 
 void APingPongGameMode::PlayerSpawned()
 {
-    if(!Controllers.Num() == MaxPlayers){
+    if(!(Controllers.Num() == MaxPlayers)){
         AFieldPlayer * Pawn = Cast<AFieldPlayer>(Controllers[0]->GetPawn());
         Pawn->C_MatchState(3);
         return;

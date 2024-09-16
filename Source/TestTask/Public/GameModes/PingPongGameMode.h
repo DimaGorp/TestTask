@@ -29,6 +29,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PinpongEndMatch(const FString& Team);
 protected:
+	
 	TArray<AFieldPlayerController*> Controllers;
 	int MaxPlayers;
 	int EndMatchScore;

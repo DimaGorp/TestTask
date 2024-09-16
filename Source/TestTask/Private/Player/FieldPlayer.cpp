@@ -2,6 +2,8 @@
 
 
 #include "Player/FieldPlayer.h"
+#include "Controllers/FieldPlayerController.h"
+#include "GameModes/PingPongGameMode.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
@@ -9,6 +11,25 @@
 // Sets default values
 AFieldPlayer::AFieldPlayer()
 {
+	// Create the box collision component
+    BoxCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+    RootComponent = BoxCollisionComponent;
+
+    // Set the size of the box collision
+    BoxCollisionComponent->SetBoxExtent(FVector(50.0f, 150.0f, 50.0f));
+	// Create and set up the mesh component
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent->SetupAttachment(BoxCollisionComponent);
+
+	// Create and set up the camera boom (spring arm)
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+    SpringArmComponent->SetupAttachment(BoxCollisionComponent);
+    SpringArmComponent->TargetArmLength = 1000.0f;  // Distance from the paw
+
+    // Create and set up the camera
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+    CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);  // Attach to end of spring arm
+
 	PrimaryActorTick.bCanEverTick = true;
 	FloatingPawnMovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovementComponent"));
     if (FloatingPawnMovementComponent)
@@ -26,7 +47,9 @@ AFieldPlayer::AFieldPlayer()
 void AFieldPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	AFieldPlayerController *P_Controller = Cast<AFieldPlayerController>(GetController());
+	UI_DrawUI(P_Controller);
+	S_PlayerSpawned();
 }
 
 // Called every frame
@@ -43,7 +66,6 @@ void AFieldPlayer::C_MatchState_Implementation(int index)
 	UI_MatchState(index);
 }
 void AFieldPlayer::Move_Sides(float Value)
-
 {
 	Value*=10;
 	if(HasAuthority()){
@@ -60,6 +82,12 @@ void AFieldPlayer::S_Move_Sides_Implementation(float Value)
     Move_Sides(Value);
 }
 
+void AFieldPlayer::S_PlayerSpawned_Implementation(){
+	APingPongGameMode * GameMode = Cast<APingPongGameMode>(GetWorld()->GetAuthGameMode());
+	if(GameMode){
+		GameMode->PlayerSpawned();
+	}
+}
 bool AFieldPlayer::S_Move_Sides_Validate(float Value)
 {
     return true;

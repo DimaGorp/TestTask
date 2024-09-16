@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Structs/S_PlayerData.h"
+#include "Components/BoxComponent.h" // For UBoxComponent
+#include "Components/StaticMeshComponent.h" // For UStaticMeshComponent
+#include "Camera/CameraComponent.h" // For UCameraComponent
+#include "GameFramework/SpringArmComponent.h" // For USpringArmComponent
 #include "FieldPlayer.generated.h"
 
 UCLASS()
@@ -30,6 +34,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UI_MatchState(int index);
 	UFUNCTION(BlueprintImplementableEvent)
+	void UI_DrawUI(const AFieldPlayerController *PlayerController);
+	UFUNCTION(BlueprintImplementableEvent)
 	void PD_SetPlayerProperties(FS_PlayerData Data);
 	UFUNCTION(BlueprintImplementableEvent)
 	void UI_ChangeScore(int team1_score,int team2_score);
@@ -39,6 +45,8 @@ public:
 	void C_MatchState(int index);
 	UFUNCTION(Client,Reliable)
 	void C_ChangeScore(int team1_Score,int team2_Score);
+	UFUNCTION(Server,Reliable)
+	void S_PlayerSpawned();
 	
 
 	//Movement
@@ -62,4 +70,19 @@ protected:
 	//RepNotify PlayerData Structure Object
     UPROPERTY(ReplicatedUsing = OnRep_S_PlayerData);
 	FS_PlayerData PlayerData;
+
+	// Box collision component
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    UBoxComponent* BoxCollisionComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    UStaticMeshComponent* MeshComponent;
+
+    // Spring arm for positioning the camera
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USpringArmComponent* SpringArmComponent;
+
+    // Camera to view from
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    UCameraComponent* CameraComponent;
 };
