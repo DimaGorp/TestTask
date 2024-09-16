@@ -1,13 +1,16 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.3",
+	"EngineAssociation": "{48437DA9-4006-2256-1F98-02B4A86B5B4D}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "TestTask",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [
@@ -17,6 +20,16 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "EnhancedInput",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"WindowsServer",
+		"Windows"
 	]
 }
