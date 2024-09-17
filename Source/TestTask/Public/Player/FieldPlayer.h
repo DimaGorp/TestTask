@@ -9,7 +9,6 @@
 #include "Components/StaticMeshComponent.h" // For UStaticMeshComponent
 #include "Camera/CameraComponent.h" // For UCameraComponent
 #include "GameFramework/SpringArmComponent.h" // For USpringArmComponent
-#include "GameFramework/HUD.h"
 #include "FieldPlayer.generated.h"
 
 UCLASS()
