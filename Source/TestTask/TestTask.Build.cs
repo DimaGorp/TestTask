@@ -7,12 +7,10 @@ public class TestTask : ModuleRules
 	public TestTask(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		PublicIncludePaths.AddRange(new string[] { "TestTask/Public" });
-        PrivateIncludePaths.AddRange(new string[] { "TestTask/Private" });
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" ,"PhysicsCore",
 
-        "EnhancedInput"
+        "EnhancedInput","UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -7,8 +7,6 @@
 #include "Player/FieldPlayer.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
-#include "GameFramework/HUD.h"
-#include "Structs/S_PlayerData.h"
 
 APingPongGameMode::APingPongGameMode()
 {
@@ -17,35 +15,37 @@ APingPongGameMode::APingPongGameMode()
     DefaultPawnClass = PawnClassFinder.Class;
 
 }
-void APingPongGameMode::PostLogin(APlayerController * NewPlayer)
+void APingPongGameMode::PostLogin(APlayerController* NewPlayer)
 {
-    AFieldPlayerController * P_Controller = Cast<AFieldPlayerController>(NewPlayer);
-    //P_Controller->MovementState(false);
-    int index  = Controllers.Add(P_Controller);
-    SpawnPlayer(P_Controller,index);
+    AFieldPlayerController* P_Controller = Cast<AFieldPlayerController>(NewPlayer);
+    P_Controller->MovementState(false);
+    int index = Controllers.Add(P_Controller);
+    SpawnPlayer(P_Controller, index);
 }
 
-void APingPongGameMode::SpawnPlayer(AFieldPlayerController *Controller, int index)
+void APingPongGameMode::SpawnPlayer(AFieldPlayerController* Controller, int index)
 {
     TArray<AActor*> PlayerStarts;
 
     // Get all actors of class APlayerStart
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
-    FTransform PlayerStartTransform(PlayerStarts[index]->GetActorRotation(),PlayerStarts[index]->GetActorLocation(),FVector(1.0f));
+    FTransform PlayerStartTransform(PlayerStarts[index]->GetActorRotation(), PlayerStarts[index]->GetActorLocation(), FVector(1.0f));
 
     FActorSpawnParameters parametrs;
     parametrs.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-    AFieldPlayer * Pawn = GetWorld()->SpawnActor<AFieldPlayer>(DefaultPawnClass,PlayerStartTransform,parametrs);
+    AFieldPlayer* Pawn = GetWorld()->SpawnActor<AFieldPlayer>(DefaultPawnClass, PlayerStartTransform, parametrs);
     Controller->Possess(Pawn);
+
 }
 
 void APingPongGameMode::PlayerSpawned()
 {
-    if(!(Controllers.Num() == MaxPlayers)){
-        AFieldPlayer * Pawn = Cast<AFieldPlayer>(Controllers[0]->GetPawn());
+    if (!(Controllers.Num() == MaxPlayers)) {
+        AFieldPlayer* Pawn = Cast<AFieldPlayer>(Controllers[0]->GetPawn());
         Pawn->C_MatchState(3);
         return;
     }
+    Controllers[1]->MovementState(true);
     StartMatch();
 
 }
@@ -66,13 +66,14 @@ void APingPongGameMode::StartMatch()
     // Create FTransform with Rotation (Quaternion), Translation, and Scale
     FTransform TargetPoint(Rotation, PositionOfBall, Scale);
 
-    for(AFieldPlayerController *Controller : Controllers){
-        AFieldPlayer *Player = Cast<AFieldPlayer>(Controller->GetPawn());
+
+    for (AFieldPlayerController* Controller : Controllers) {
+        AFieldPlayer* Player = Cast<AFieldPlayer>(Controller->GetPawn());
         Player->C_MatchState(0);
         Controller->MovementState(true);
     }
     UpdatePlayerScoreUI();
-    
+    SpawnBall(TargetPoint);
 }
 
 void APingPongGameMode::UpdatePlayerScoreUI()
@@ -92,24 +93,45 @@ void APingPongGameMode::UpdatePlayerScoreUI()
 
 void APingPongGameMode::CheckMatchRule()
 {
-    if(Team1Score == EndMatchScore){
+    if (Team1Score == EndMatchScore) {
         PinpongEndMatch(TEXT("Team1"));
-    }else if(Team2Score == EndMatchScore)
+    }
+    else if (Team2Score == EndMatchScore)
         PinpongEndMatch(TEXT("Team2"));
 }
 
 void APingPongGameMode::OnBallScore(int ScoringTeam)
 {
-    switch(ScoringTeam){
-        case 1:{
-            Team1Score++;
-            break;
-        }
-        case 2:{
-            Team2Score++;
-            break;
-        }
+    switch (ScoringTeam) {
+    case 1: {
+        Team1Score++;
+        break;
+    }
+    case 2: {
+        Team2Score++;
+        break;
+    }
     }
     CheckMatchRule();
     UpdatePlayerScoreUI();
+}
+
+void APingPongGameMode::PinpongEndMatch(const FString& Team)
+{
+    if (Team == "Team1") {
+        Controllers[0]->MovementState(false);
+        AFieldPlayer* Team1 = Cast<AFieldPlayer>(Controllers[0]->GetPawn());
+        AFieldPlayer* Team2 = Cast<AFieldPlayer>(Controllers[1]->GetPawn());
+        Team1->C_MatchState(2);
+        Team2->C_MatchState(1);
+        DestroyBall();
+    }
+    else if (Team == "Team2") {
+        Controllers[1]->MovementState(false);
+        AFieldPlayer* Team1 = Cast<AFieldPlayer>(Controllers[0]->GetPawn());
+        AFieldPlayer* Team2 = Cast<AFieldPlayer>(Controllers[1]->GetPawn());
+        Team1->C_MatchState(1);
+        Team2->C_MatchState(2);
+        DestroyBall();
+    }
 }

@@ -8,30 +8,30 @@
 #include "FieldPlayerController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class TESTTASK_API AFieldPlayerController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	virtual void BeginPlay() override;
-        virtual void SetupInputComponent() override;
+    virtual void BeginPlay() override;
+    virtual void SetupInputComponent() override;
+    virtual void OnPossess(APawn* aPawn) override;
+    //Bool variable to Enable/Disable Input
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    bool AbbleToMove = true;
 
-        //Bool variable to Enable/Disable Input
-        UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Input")
-        bool AbbleToMove = true;
 
-        
-        UFUNCTION(Client,Reliable)
-        void MovementState(bool Moving);
+    UFUNCTION(Client, Reliable)
+    void MovementState(bool Moving);
 protected:
-        void Move(const FInputActionValue& Value);
-	// Input Mapping Context
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-        class UInputMappingContext* DefaultMappingContext;
-        // Input Actions
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-        class UInputAction* MoveAction;
+    void Move(const FInputActionValue& Value);
+    // Input Mapping Context
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    class UInputMappingContext* DefaultMappingContext;
+    // Input Actions
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    class UInputAction* MoveAction;
 
 };
